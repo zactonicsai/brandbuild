@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brand Builder Tutorial (Accessible • Dropshipping + POD)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Optional semantic colors (color-blind friendly) -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2563EB", // blue-600
+              accent: "#D97706",  // amber-600
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-slate-50 text-slate-900">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white">
+      <div class="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-xl bg-primary text-white flex items-center justify-center font-bold">BB</div>
+          <div>
+            <h1 class="text-lg font-semibold leading-tight">Brand Builder Tutorial</h1>
+            <p class="text-xs text-slate-600">Dropshipping + Print-on-Demand • Step-by-step • Saves in your browser</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-end gap-2">
+          <button
+            id="btnExport"
+            class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
+          >
+            Export JSON
+          </button>
+
+          <label
+            class="cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100 focus-within:ring-2 focus-within:ring-blue-600"
+          >
+            Import JSON
+            <input id="fileImport" type="file" accept="application/json" class="hidden" />
+          </label>
+
+          <button
+            id="btnReset"
+            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            title="Clears all saved data"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <div class="mx-auto max-w-6xl px-4 pb-4">
+        <div class="h-2 w-full rounded bg-slate-200 overflow-hidden" aria-label="Progress bar">
+          <div id="progressBar" class="h-2 bg-primary w-0"></div>
+        </div>
+        <div class="mt-2 flex items-center justify-between text-xs text-slate-600">
+          <span id="progressText">Progress: 0%</span>
+          <span id="saveStatus">Saved locally</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-6xl px-4 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left Nav -->
+        <aside class="lg:col-span-4">
+          <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="text-base font-semibold">Your Steps</h2>
+              <button
+                id="btnGoToNextIncomplete"
+                class="text-xs rounded-lg border border-slate-300 bg-white px-3 py-2 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                title="Jump to your next incomplete step"
+              >
+                Next incomplete →
+              </button>
+            </div>
+
+            <p class="mt-2 text-sm text-slate-700">
+              Fill out each step. Everything auto-saves to <span class="font-semibold">localStorage</span>. Export JSON to back it up.
+            </p>
+
+            <div class="mt-4 space-y-2" id="stepList"></div>
+
+            <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <p class="text-xs text-slate-700">
+                Tip: In <span class="font-semibold">Step 1</span>, use the <span class="font-semibold">niche dropdown</span> to auto-fill examples and hints.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h3 class="text-base font-semibold">Quick Reference</h3>
+            <ul class="mt-3 space-y-2 text-sm text-slate-700 list-disc pl-5">
+              <li><span class="font-semibold">Dropshipping</span>: a supplier ships items to your customer.</li>
+              <li><span class="font-semibold">Print-on-Demand</span>: items are printed only after someone buys.</li>
+              <li><span class="font-semibold">Brand</span>: promise + personality + visuals + customer experience.</li>
+            </ul>
+          </div>
+        </aside>
+
+        <!-- Right Content -->
+        <section class="lg:col-span-8">
+          <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div>
+                <p class="text-xs uppercase tracking-widest text-slate-600" id="stepKicker">Step</p>
+                <h2 class="text-2xl font-bold" id="stepTitle">Loading…</h2>
+                <p class="mt-2 text-sm text-slate-700" id="stepSubtitle"></p>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button
+                  id="btnPrev"
+                  class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                >
+                  ← Prev
+                </button>
+                <button
+                  id="btnNext"
+                  class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-6 space-y-6" id="stepBody"></div>
+
+            <div class="mt-8 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+              <div class="flex flex-wrap items-center gap-2">
+                <span
+                  id="completionBadge"
+                  class="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-xs font-medium"
+                >
+                  ⏳ Step not complete
+                </span>
+
+                <button
+                  id="btnMarkComplete"
+                  class="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                >
+                  Mark step complete
+                </button>
+
+                <button
+                  id="btnMarkIncomplete"
+                  class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                >
+                  Mark incomplete
+                </button>
+              </div>
+
+              <div class="text-xs text-slate-600">Autosave: <span class="font-semibold">On</span></div>
+            </div>
+          </div>
+
+          <div class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-base font-semibold">Brand Snapshot (auto-generated)</h3>
+              <button
+                id="btnCopySnapshot"
+                class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              >
+                Copy snapshot
+              </button>
+            </div>
+            <p class="mt-2 text-sm text-slate-700">Use this to brief a designer, supplier, or marketing partner.</p>
+            <pre
+              id="brandSnapshot"
+              class="mt-4 whitespace-pre-wrap break-words rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs text-slate-900"
+            ></pre>
+          </div>
+
+          <div class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-base font-semibold">Safety Note</h3>
+            <p class="mt-2 text-sm text-slate-700">
+              Only upload images you own or have permission to use. Exported JSON can get large if you add many images.
+              If localStorage gets full, upload fewer/smaller images (ideally under ~4MB each).
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="mx-auto max-w-6xl px-4 py-6 text-xs text-slate-600">
+        Single-file tutorial. Data saved in your browser (localStorage). Export/import JSON backups anytime.
+      </div>
+    </footer>
+
+    <div id="toast" class="pointer-events-none fixed bottom-6 left-1/2 -translate-x-1/2 opacity-0 transition-opacity duration-200">
+      <div class="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm shadow-lg">
+        <span id="toastText">Saved</span>
+      </div>
+    </div>
+
+    <script>
+      /***********************
+       * Brand Builder Tutorial (Accessible)
+       * - Color-blind friendly palette
+       * - Niche dropdown included (FIXED)
+       * - Hints/examples per step
+       * - Image upload + localStorage
+       * - Export/Import JSON
+       ************************/
+
+      const STORAGE_KEY = "brand_builder_accessible_v2";
+      const $ = (id) => document.getElementById(id);
+
+      // ---- Niche library (dropdown values) ----
+      const NICHE_LIBRARY = [
+        {
+          id: "faith_gifts",
+          name: "Faith-based Gifts & Apparel",
+          taglineIdeas: ["Wear the Word. Live the Light.", "Faith that feels like home."],
+          customer: "People who love uplifting messages, faith community vibes, and meaningful gifting.",
+          problem: "They want stylish faith items without generic designs.",
+          usp: "Clean modern designs, premium blanks, and gift-ready presentation.",
+          vibe: { keywords: "uplifting, clean, warm, modern", colors: "cream, charcoal, gold accents", fonts: "modern sans + elegant serif accent" },
+          products: { hero: "Signature verse hoodie", categories: "Hoodies, Tees, Journals, Mugs, Tote Bags", price: "$28–$85" },
+          content: { pillars: "Daily encouragement, Behind-the-design, Customer stories/testimonials" },
+          examples: {
+            nameExamples: ["Light & Linen Co.", "Verse & Victory", "Amen Avenue"],
+            descriptionTemplate: "Feeling → benefits → materials/fit → care → shipping → brand promise.",
+            trustSignals: "Clear shipping times, easy exchanges, gift-ready photos, testimonials.",
+          },
+        },
+        {
+          id: "fitness",
+          name: "Fitness Motivation (Gym + Lifestyle)",
+          taglineIdeas: ["Built for the grind.", "Strong days. Stronger mindset."],
+          customer: "Busy gym-goers who want motivation + minimal style and follow fitness creators.",
+          problem: "They want gym gear that looks good and pushes mindset.",
+          usp: "Minimal designs, consistent drops, clear sizing, reliable shipping.",
+          vibe: { keywords: "bold, minimal, energetic", colors: "black, white, blue accent", fonts: "bold sans / condensed" },
+          products: { hero: "Minimal statement tee", categories: "Tees, Hoodies, Shakers, Gym bags, Wraps", price: "$22–$75" },
+          content: { pillars: "Workout clips, Mindset tips, Product styling" },
+          examples: {
+            nameExamples: ["Iron Ritual", "Rep Republic", "Mindset Muscle Co."],
+            descriptionTemplate: "Headline → 3 benefits → fit/material → care → shipping.",
+            trustSignals: "Size guide, real photos/video, quality promise, fast support.",
+          },
+        },
+        {
+          id: "pets",
+          name: "Pet Lovers (Dogs/Cats) Gifts",
+          taglineIdeas: ["Made for the fur family.", "Because pets are people too."],
+          customer: "Pet parents who buy gifts, custom items, and cute accessories.",
+          problem: "They want fun items that match pet-parent identity and gift well.",
+          usp: "Cute premium designs, personalization options, reliable delivery.",
+          vibe: { keywords: "cute, playful, friendly", colors: "soft neutrals + blue accent", fonts: "rounded sans + playful accent" },
+          products: { hero: "Custom pet portrait mug", categories: "Mugs, Tees, Hoodies, Bandanas, Stickers", price: "$18–$65" },
+          content: { pillars: "Pet content, Memes, Custom order highlights" },
+          examples: {
+            nameExamples: ["FurEver & Co.", "Paws & Co.", "The Pet Hype Studio"],
+            descriptionTemplate: "What it is → why it’s perfect → personalization → shipping → guarantee.",
+            trustSignals: "Clear personalization steps, proof photos, easy fixes for mistakes (if feasible).",
+          },
+        },
+        {
+          id: "home_decor",
+          name: "Home Decor (Cozy / Modern / Statement)",
+          taglineIdeas: ["Home that feels like you.", "Curated comfort, every corner."],
+          customer: "People upgrading apartments/homes who love aesthetic decor and meaningful pieces.",
+          problem: "They want decor that feels curated, not random.",
+          usp: "Curated collections + consistent style story with quality materials.",
+          vibe: { keywords: "cozy, curated, premium", colors: "earth tones + warm accents", fonts: "modern serif + clean sans" },
+          products: { hero: "Statement wall art print", categories: "Wall art, Pillows, Throws, Organizers", price: "$25–$150" },
+          content: { pillars: "Room setups, Styling tips, Collection drops" },
+          examples: {
+            nameExamples: ["Corner & Crown", "Hearth & Hue", "Room Ritual"],
+            descriptionTemplate: "Story → size/materials → styling tips → shipping.",
+            trustSignals: "Size charts, material info, room mockups, care guidance.",
+          },
+        },
+      ];
+
+      // ---- Steps (full) ----
+      const steps = [
+        {
+          id: "step1_foundation",
+          title: "Pick a Brand Direction (Niche + Customer)",
+          subtitle: "Choose a niche from the dropdown (recommended) to unlock targeted hints/examples in every step.",
+          fields: [
+            { key: "nichePreset", label: "Common niches (dropdown)", type: "nicheSelect", placeholder: "" },
+            { key: "niche", label: "Niche (category)", type: "text", placeholder: "Example: Faith-based gifts, Gym motivation tees, Pet lover gifts" },
+            { key: "customer", label: "Ideal Customer", type: "textarea", placeholder: "Who are they? What do they care about? Where do they shop?" },
+            { key: "problem", label: "Problem / Desire you serve", type: "textarea", placeholder: "What do they want to feel or achieve?" },
+            { key: "usp", label: "Unique angle (why you?)", type: "textarea", placeholder: "Quality promise, style, shipping, packaging, personalization, etc." },
+          ],
+          checklist: ["I can describe my customer in one sentence.", "I can say how I'm different.", "I picked a niche I can make content for weekly."],
+          guidance: [
+            "POD wins by identity + design. Dropshipping wins by curation + trust + speed.",
+            "Start specific. You can expand later.",
+            "If you can’t explain the niche in 10 seconds, tighten it.",
+          ],
+        },
+        {
+          id: "step2_identity",
+          title: "Name, Mission, Values, and Voice",
+          subtitle: "This is your brand personality. It guides captions, product descriptions, and customer experience.",
+          fields: [
+            { key: "brandName", label: "Brand Name", type: "text", placeholder: "Tip: short, memorable, easy to spell." },
+            { key: "tagline", label: "Tagline", type: "text", placeholder: "Short promise. Example: “Home that feels like you.”" },
+            { key: "mission", label: "Mission", type: "textarea", placeholder: "We help (customer) feel (emotion) by (solution)." },
+            { key: "values", label: "Values (3–5)", type: "textarea", placeholder: "Quality, honesty, community, joy, sustainability..." },
+            { key: "voice", label: "Brand voice (3 adjectives)", type: "text", placeholder: "Bold, encouraging, modern (example)" },
+          ],
+          checklist: ["My name fits the niche.", "My mission is customer-centered.", "My voice is clear in 3 adjectives."],
+          guidance: ["Mission formula: We help (customer) feel (emotion) by (solution).", "Keep voice consistent across everything."],
+        },
+        {
+          id: "step3_visuals",
+          title: "Visual Identity (Colors, Fonts, Vibe + Inspiration Images)",
+          subtitle: "Decide the look. Upload moodboard images and optional logo drafts.",
+          fields: [
+            { key: "colors", label: "Color palette notes", type: "textarea", placeholder: "Pick 2 main colors + 1 accent." },
+            { key: "fonts", label: "Font style notes", type: "textarea", placeholder: "Use 1–2 fonts max: headline + body." },
+            { key: "vibe", label: "Vibe keywords", type: "text", placeholder: "Clean, cozy, bold, premium, playful..." },
+          ],
+          images: [
+            { key: "inspoImages", label: "Upload Inspiration Images (moodboard)" },
+            { key: "logoDrafts", label: "Upload Logo Drafts (optional)" },
+          ],
+          checklist: ["I chose 3–5 vibe keywords.", "I uploaded at least 2 inspiration images.", "My visuals match my customer."],
+          guidance: ["Consistency builds trust. Repeat the same look everywhere.", "If POD: create a repeatable design system."],
+        },
+        {
+          id: "step4_products",
+          title: "Choose Your Product Strategy (Dropshipping vs POD vs Hybrid)",
+          subtitle: "Pick your hero product and a small set of supporting products.",
+          fields: [
+            { key: "model", label: "Business model", type: "select", options: ["Dropshipping", "Print-on-Demand (POD)", "Hybrid"] },
+            { key: "productCategories", label: "Product categories (3–7 max)", type: "textarea", placeholder: "Example: tees, hoodies, mugs, totes..." },
+            { key: "heroProduct", label: "Hero product (#1 featured)", type: "text", placeholder: "The product you market the most." },
+            { key: "priceRange", label: "Target price range", type: "text", placeholder: "Example: $28–$85" },
+            { key: "qualityNotes", label: "Quality/materials notes", type: "textarea", placeholder: "Fit, fabric, printing method, packaging..." },
+          ],
+          checklist: ["I chose 1 hero product.", "I limited categories to 3–7.", "My pricing fits my customer."],
+          guidance: ["Start focused. Too many products makes marketing harder.", "Dropshipping: prioritize reliable shipping."],
+        },
+        {
+          id: "step5_assets",
+          title: "Create/Collect Product Assets (Images, Mockups, Descriptions)",
+          subtitle: "Upload images/designs and write repeatable product copy.",
+          fields: [
+            { key: "productTitleStyle", label: "Product title style", type: "text", placeholder: "Example: “The (Name) Hoodie” or “(Vibe) Essential Tee”" },
+            { key: "descriptionTemplate", label: "Product description template", type: "textarea", placeholder: "Benefits → materials/fit → care → shipping → brand promise." },
+            { key: "shippingPromise", label: "Shipping promise wording", type: "textarea", placeholder: "Be honest. Example: “Made to order. Ships in 3–7 business days.”" },
+          ],
+          images: [
+            { key: "productImages", label: "Upload Product Images/Mockups" },
+            { key: "designFiles", label: "Upload POD Designs (PNG/SVG/JPG)" },
+          ],
+          checklist: ["I uploaded at least 3 product images.", "I drafted a reusable description template.", "My shipping promise is realistic."],
+          guidance: ["Use consistent image framing and lighting.", "Lead with benefits, then details."],
+        },
+        {
+          id: "step6_store",
+          title: "Store Setup Blueprint (Pages + Policies + Trust)",
+          subtitle: "Plan the pages and trust signals your store needs.",
+          fields: [
+            { key: "storePlatform", label: "Store platform", type: "select", options: ["Shopify", "WooCommerce", "Etsy (POD)", "TikTok Shop", "Other"] },
+            { key: "pages", label: "Required pages", type: "textarea", placeholder: "Home, Shop, About, Contact, FAQ, Shipping/Returns, Privacy..." },
+            { key: "policies", label: "Policies notes", type: "textarea", placeholder: "Returns, shipping, damaged items, address changes..." },
+            { key: "trustSignals", label: "Trust signals", type: "textarea", placeholder: "Reviews, real photos/video, clear shipping times, guarantee, contact info..." },
+          ],
+          checklist: ["I know my starting platform.", "I listed key pages.", "I defined at least 3 trust signals."],
+          guidance: ["Most stores fail due to low trust. Make it easy to believe you’re real.", "Make policies easy to find."],
+        },
+        {
+          id: "step7_marketing",
+          title: "Marketing Plan (Content, Offers, Launch)",
+          subtitle: "Pick one main channel and keep it simple for 30 days.",
+          fields: [
+            { key: "primaryChannel", label: "Primary marketing channel", type: "select", options: ["TikTok", "Instagram Reels", "YouTube Shorts", "Pinterest", "Facebook Groups", "Email"] },
+            { key: "contentPillars", label: "Content pillars (3 themes)", type: "textarea", placeholder: "Education, behind-the-scenes, lifestyle, testimonials..." },
+            { key: "launchOffer", label: "Launch offer", type: "textarea", placeholder: "Example: 10% off, free shipping threshold, limited drop..." },
+            { key: "weeklyPlan", label: "Weekly posting plan", type: "textarea", placeholder: "Example: 5 shorts/week + 2 stories + 1 email." },
+          ],
+          checklist: ["I chose one primary channel.", "I defined 3 content pillars.", "I created a simple offer."],
+          guidance: ["Win one platform first. Don’t try to be everywhere.", "Your content should match your brand voice."],
+        },
+        {
+          id: "step8_ops",
+          title: "Operations (Fulfillment, Support, Finances)",
+          subtitle: "Plan how you handle orders, issues, and profitability.",
+          fields: [
+            { key: "fulfillmentPlan", label: "Fulfillment plan", type: "textarea", placeholder: "Provider, processing time, tracking, packaging..." },
+            { key: "supportPlan", label: "Customer support plan", type: "textarea", placeholder: "Support email, response time, templates, refunds..." },
+            { key: "costs", label: "Costs to track", type: "textarea", placeholder: "COGS, platform fees, payment fees, ads, apps..." },
+            { key: "profitGoal", label: "Monthly profit goal", type: "text", placeholder: "Example: $1,000/month" },
+          ],
+          checklist: ["I defined fulfillment timelines.", "I wrote a support plan.", "I listed costs + profit goal."],
+          guidance: ["Support speed builds trust. Aim for 24–48 hours response time.", "Track costs weekly."],
+        },
+        {
+          id: "step9_launch",
+          title: "Launch Checklist + 30-Day Execution",
+          subtitle: "Launch, collect feedback, and iterate weekly.",
+          fields: [
+            { key: "launchDate", label: "Target launch date", type: "date" },
+            { key: "softLaunchPlan", label: "Soft launch plan", type: "textarea", placeholder: "Who will buy first? How will you ask for reviews?" },
+            { key: "first30Days", label: "First 30 days plan", type: "textarea", placeholder: "Weekly goals: content, outreach, product iteration." },
+            { key: "metrics", label: "Metrics to watch", type: "textarea", placeholder: "Visits, conversion rate, AOV, refund rate, email signups..." },
+          ],
+          checklist: ["I chose a launch date.", "I planned a soft launch.", "I wrote a 30-day plan + metrics."],
+          guidance: ["Launch small. Improve weekly based on feedback and numbers."],
+        },
+      ];
+
+      // ---- State ----
+      const defaultState = {
+        meta: { version: 2, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        ui: { currentStepIndex: 0, completedSteps: {} },
+        data: {},
+        images: {},
+      };
+
+      let state = loadState();
+
+      // ---- Elements ----
+      const stepListEl = $("stepList");
+      const stepTitleEl = $("stepTitle");
+      const stepSubtitleEl = $("stepSubtitle");
+      const stepKickerEl = $("stepKicker");
+      const stepBodyEl = $("stepBody");
+      const progressBarEl = $("progressBar");
+      const progressTextEl = $("progressText");
+      const saveStatusEl = $("saveStatus");
+      const completionBadgeEl = $("completionBadge");
+
+      // ---- Events ----
+      $("btnPrev").addEventListener("click", () => goStep(state.ui.currentStepIndex - 1));
+      $("btnNext").addEventListener("click", () => goStep(state.ui.currentStepIndex + 1));
+      $("btnMarkComplete").addEventListener("click", () => setStepCompleted(true));
+      $("btnMarkIncomplete").addEventListener("click", () => setStepCompleted(false));
+      $("btnExport").addEventListener("click", exportToJson);
+      $("fileImport").addEventListener("change", importFromJsonFile);
+      $("btnReset").addEventListener("click", resetAll);
+      $("btnGoToNextIncomplete").addEventListener("click", goToNextIncomplete);
+      $("btnCopySnapshot").addEventListener("click", copySnapshot);
+
+      // ---- Initial render ----
+      renderStepList();
+      renderCurrentStep();
+      renderProgress();
+      renderSnapshot();
+
+      // If niche already selected, apply autofill (non-destructive)
+      const chosen = getSelectedNiche();
+      if (chosen) applyNicheAutofill(chosen, true);
+
+      // --------------------
+      // State helpers
+      // --------------------
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return structuredClone(defaultState);
+          const parsed = JSON.parse(raw);
+          const merged = structuredClone(defaultState);
+          deepMerge(merged, parsed);
+          return merged;
+        } catch {
+          return structuredClone(defaultState);
+        }
+      }
+
+      function saveState(withToast = true) {
+        state.meta.updatedAt = new Date().toISOString();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        saveStatusEl.textContent = "Saved locally";
+        if (withToast) showToast("Saved ✅");
+        renderProgress();
+        renderSnapshot();
+      }
+
+      function deepMerge(target, source) {
+        for (const key in source) {
+          if (
+            source[key] &&
+            typeof source[key] === "object" &&
+            !Array.isArray(source[key]) &&
+            target[key] &&
+            typeof target[key] === "object" &&
+            !Array.isArray(target[key])
+          ) {
+            deepMerge(target[key], source[key]);
+          } else {
+            target[key] = source[key];
+          }
+        }
+        return target;
+      }
+
+      // --------------------
+      // Navigation / completion
+      // --------------------
+      function goStep(index) {
+        if (index < 0) index = 0;
+        if (index > steps.length - 1) index = steps.length - 1;
+        state.ui.currentStepIndex = index;
+        saveState(false);
+        renderCurrentStep();
+        highlightActiveStep();
+      }
+
+      function setStepCompleted(isComplete) {
+        const step = steps[state.ui.currentStepIndex];
+        if (isComplete) state.ui.completedSteps[step.id] = true;
+        else delete state.ui.completedSteps[step.id];
+        saveState(true);
+        renderStepList();
+        renderCurrentStep();
+      }
+
+      function goToNextIncomplete() {
+        const idx = steps.findIndex((s, i) => i > state.ui.currentStepIndex && !state.ui.completedSteps[s.id]);
+        if (idx !== -1) return goStep(idx);
+
+        const idx2 = steps.findIndex((s) => !state.ui.completedSteps[s.id]);
+        if (idx2 !== -1) return goStep(idx2);
+
+        showToast("All steps complete 🎉");
+      }
+
+      // --------------------
+      // Dropdown helpers (FIXED)
+      // --------------------
+      function getSelectedNiche() {
+        const nicheId = (state.data.nichePreset || "").trim();
+        return NICHE_LIBRARY.find((n) => n.id === nicheId) || null;
+      }
+
+      function applyNicheAutofill(nicheObj, quiet = false) {
+        const setIfEmpty = (key, val) => {
+          const cur = (state.data[key] || "").toString().trim();
+          if (!cur && val) state.data[key] = val;
+        };
+
+        setIfEmpty("niche", nicheObj.name);
+        setIfEmpty("customer", nicheObj.customer);
+        setIfEmpty("problem", nicheObj.problem);
+        setIfEmpty("usp", nicheObj.usp);
+        setIfEmpty("tagline", nicheObj.taglineIdeas?.[0] || "");
+        setIfEmpty("vibe", nicheObj.vibe.keywords);
+        setIfEmpty("colors", nicheObj.vibe.colors);
+        setIfEmpty("fonts", nicheObj.vibe.fonts);
+        setIfEmpty("heroProduct", nicheObj.products.hero);
+        setIfEmpty("productCategories", nicheObj.products.categories);
+        setIfEmpty("priceRange", nicheObj.products.price);
+        setIfEmpty("contentPillars", nicheObj.content.pillars);
+        setIfEmpty("trustSignals", nicheObj.examples.trustSignals);
+        setIfEmpty("descriptionTemplate", nicheObj.examples.descriptionTemplate);
+        setIfEmpty("brandName", nicheObj.examples?.nameExamples?.[0] || "");
+
+        saveState(!quiet);
+        renderStepList();
+      }
+
+      // --------------------
+      // UI renderers
+      // --------------------
+      function renderStepList() {
+        stepListEl.innerHTML = "";
+        steps.forEach((s, i) => {
+          const isActive = i === state.ui.currentStepIndex;
+          const isComplete = !!state.ui.completedSteps[s.id];
+
+          const btn = document.createElement("button");
+          btn.className =
+            "w-full text-left rounded-lg border px-3 py-3 transition focus:outline-none focus:ring-2 focus:ring-blue-600 " +
+            (isActive ? "border-blue-300 bg-blue-50" : "border-slate-200 bg-white hover:bg-slate-50");
+
+          btn.addEventListener("click", () => goStep(i));
+
+          btn.innerHTML = `
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-xs text-slate-600">Step ${i + 1} of ${steps.length}</div>
+                <div class="mt-0.5 font-semibold text-slate-900">${escapeHtml(s.title)}</div>
+              </div>
+              <div class="shrink-0">
+                ${
+                  isComplete
+                    ? `<span class="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-100 px-2 py-1 text-xs font-medium">✔ Complete</span>`
+                    : `<span class="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2 py-1 text-xs">⏳ Todo</span>`
+                }
+              </div>
+            </div>
+          `;
+          stepListEl.appendChild(btn);
+        });
+        highlightActiveStep();
+      }
+
+      function highlightActiveStep() {
+        const buttons = stepListEl.querySelectorAll("button");
+        const active = buttons[state.ui.currentStepIndex];
+        if (active) active.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+
+      function renderCurrentStep() {
+        const step = steps[state.ui.currentStepIndex];
+        stepKickerEl.textContent = `Step ${state.ui.currentStepIndex + 1} of ${steps.length}`;
+        stepTitleEl.textContent = step.title;
+        stepSubtitleEl.textContent = step.subtitle;
+
+        const isComplete = !!state.ui.completedSteps[step.id];
+        completionBadgeEl.textContent = isComplete ? "✔ Step complete" : "⏳ Step not complete";
+        completionBadgeEl.className =
+          "inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium " +
+          (isComplete ? "border-slate-300 bg-slate-100" : "border-slate-300 bg-white");
+
+        // Prev/Next enable
+        $("btnPrev").disabled = state.ui.currentStepIndex === 0;
+        $("btnNext").disabled = state.ui.currentStepIndex === steps.length - 1;
+
+        stepBodyEl.innerHTML = "";
+
+        // Mini lesson
+        stepBodyEl.appendChild(callout("Mini lesson", step.guidance || [], "blue"));
+
+        // Hints & examples
+        stepBodyEl.appendChild(callout("Hints & examples", buildStepExamples(step.id), "amber"));
+
+        // Fields
+        const fieldsWrap = document.createElement("div");
+        fieldsWrap.className = "grid grid-cols-1 gap-4";
+        (step.fields || []).forEach((f) => fieldsWrap.appendChild(renderField(f)));
+        stepBodyEl.appendChild(fieldsWrap);
+
+        // Images
+        if (step.images && step.images.length) {
+          const imgWrap = document.createElement("div");
+          imgWrap.className = "space-y-4";
+          step.images.forEach((imgSpec) => imgWrap.appendChild(renderImageUploader(step, imgSpec)));
+          stepBodyEl.appendChild(imgWrap);
+        }
+
+        // Checklist
+        if (step.checklist?.length) {
+          const c = document.createElement("div");
+          c.className = "rounded-lg border border-slate-200 bg-slate-50 p-4";
+          c.innerHTML = `
+            <h3 class="font-semibold text-slate-900">Completion checklist</h3>
+            <ul class="mt-2 list-disc pl-5 text-sm text-slate-800">
+              ${step.checklist.map((x) => `<li>${escapeHtml(x)}</li>`).join("")}
+            </ul>
+          `;
+          stepBodyEl.appendChild(c);
+        }
+      }
+
+      function callout(title, bullets, flavor) {
+        const card = document.createElement("div");
+        const styles =
+          flavor === "amber"
+            ? "border-l-4 border-amber-600 bg-amber-50"
+            : "border-l-4 border-blue-600 bg-blue-50";
+        const titleColor = flavor === "amber" ? "text-amber-900" : "text-blue-900";
+
+        card.className = `rounded-lg ${styles} p-4`;
+        card.innerHTML = `
+          <h3 class="font-semibold ${titleColor}">${escapeHtml(title)}</h3>
+          <ul class="mt-2 list-disc pl-5 text-sm text-slate-800">
+            ${(bullets || []).map((b) => `<li>${escapeHtml(b)}</li>`).join("")}
+          </ul>
+        `;
+        return card;
+      }
+
+      function buildStepExamples(stepId) {
+        const niche = getSelectedNiche();
+        const generic = {
+          step1_foundation: [
+            "Example niche: “Pet lover gifts”",
+            "Example customer: “Pet parents who buy gifts and love personalization.”",
+            "Example USP: “Cute premium designs + clear personalization steps.”",
+          ],
+          step2_identity: [
+            "Name formula: [Vibe] + [Object] (e.g., “Hearth & Hue”)",
+            "Mission formula: “We help (customer) feel (emotion) by (solution).”",
+            "Voice examples: Bold + modern + encouraging",
+          ],
+          step3_visuals: ["Pick 2 main colors + 1 accent.", "Use 1–2 fonts max.", "Upload 2–6 inspiration images."],
+          step4_products: ["Start with 1 hero product + 3 supporting items.", "Keep categories small so marketing is simple."],
+          step5_assets: ["Use 3 images per product: front, lifestyle, detail.", "Lead with benefits, then details."],
+          step6_store: ["Must-have pages: About, Contact, FAQ, Shipping/Returns.", "Trust signals beat fancy design."],
+          step7_marketing: ["Pick ONE channel for 30 days.", "Use 3 pillars: education, BTS, proof."],
+          step8_ops: ["Set a support response time goal.", "Track costs weekly."],
+          step9_launch: ["Soft launch to a small group first.", "Improve weekly based on numbers."],
+        };
+
+        const out = [...(generic[stepId] || [])];
+        if (niche) {
+          out.unshift(`Niche pack selected: ${niche.name}`);
+          if (stepId === "step2_identity") out.push(`Name ideas: ${niche.examples.nameExamples.join(", ")}`);
+          if (stepId === "step4_products") out.push(`Hero product idea: ${niche.products.hero}`);
+          if (stepId === "step7_marketing") out.push(`Content pillars idea: ${niche.content.pillars}`);
+        }
+        return out;
+      }
+
+      function renderField(field) {
+        const wrap = document.createElement("div");
+        wrap.className = "rounded-lg border border-slate-200 bg-white p-4";
+
+        const value = state.data[field.key] ?? "";
+
+        const label = document.createElement("label");
+        label.className = "block text-sm font-semibold text-slate-900";
+        label.textContent = field.label;
+
+        const hint = document.createElement("div");
+        hint.className = "mt-1 text-xs text-slate-600";
+        hint.textContent = field.placeholder || "";
+
+        wrap.appendChild(label);
+        if (field.placeholder) wrap.appendChild(hint);
+
+        let input;
+
+        // ✅ FIX: nicheSelect renders a dropdown populated from NICHE_LIBRARY
+        if (field.type === "nicheSelect") {
+          input = document.createElement("select");
+          input.className =
+            "mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600";
+
+          input.innerHTML =
+            `<option value="">Select a niche…</option>` +
+            NICHE_LIBRARY.map((n) => `<option value="${escapeHtml(n.id)}">${escapeHtml(n.name)}</option>`).join("");
+
+          input.value = value;
+
+          input.addEventListener("change", () => {
+            state.data[field.key] = input.value;
+
+            const chosen = getSelectedNiche();
+            if (chosen) applyNicheAutofill(chosen);
+
+            saveDebounced();
+            renderCurrentStep(); // refresh hints/examples immediately
+          });
+        } else if (field.type === "textarea") {
+          input = document.createElement("textarea");
+          input.rows = 5;
+          input.value = value;
+          input.className =
+            "mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600";
+          input.placeholder = field.placeholder || "";
+
+          input.addEventListener("input", () => {
+            state.data[field.key] = input.value;
+            saveDebounced();
+          });
+        } else if (field.type === "select") {
+          input = document.createElement("select");
+          input.className =
+            "mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600";
+          const opts = field.options || [];
+          input.innerHTML =
+            `<option value="">Select…</option>` +
+            opts.map((o) => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join("");
+          input.value = value;
+
+          input.addEventListener("change", () => {
+            state.data[field.key] = input.value;
+            saveDebounced();
+          });
+        } else if (field.type === "date") {
+          input = document.createElement("input");
+          input.type = "date";
+          input.value = value;
+          input.className =
+            "mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600";
+
+          input.addEventListener("input", () => {
+            state.data[field.key] = input.value;
+            saveDebounced();
+          });
+        } else {
+          input = document.createElement("input");
+          input.type = "text";
+          input.value = value;
+          input.placeholder = field.placeholder || "";
+          input.className =
+            "mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600";
+
+          input.addEventListener("input", () => {
+            state.data[field.key] = input.value;
+            saveDebounced();
+          });
+        }
+
+        wrap.appendChild(input);
+
+        // Optional preview under niche dropdown
+        if (field.type === "nicheSelect") {
+          const preview = document.createElement("div");
+          preview.className = "mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800";
+          const chosen = getSelectedNiche();
+          preview.innerHTML = chosen
+            ? `<div class="font-semibold">Selected: ${escapeHtml(chosen.name)}</div>
+               <div class="mt-1 text-slate-700"><span class="font-semibold">Hero:</span> ${escapeHtml(chosen.products.hero)}</div>
+               <div class="mt-1 text-slate-700"><span class="font-semibold">Customer:</span> ${escapeHtml(chosen.customer)}</div>`
+            : `<div class="text-slate-700">Pick a niche to auto-fill examples in later steps.</div>`;
+          wrap.appendChild(preview);
+        }
+
+        return wrap;
+      }
+
+      function renderImageUploader(step, imgSpec) {
+        if (!state.images[imgSpec.key]) state.images[imgSpec.key] = [];
+
+        const wrap = document.createElement("div");
+        wrap.className = "rounded-lg border border-slate-200 bg-white p-4";
+
+        const top = document.createElement("div");
+        top.className = "flex items-start justify-between gap-3";
+
+        top.innerHTML = `
+          <div>
+            <div class="text-sm font-semibold text-slate-900">${escapeHtml(imgSpec.label)}</div>
+            <div class="mt-1 text-xs text-slate-600">Stored in your browser. Export JSON to back up images.</div>
+          </div>
+        `;
+
+        const actions = document.createElement("div");
+        actions.className = "flex items-center gap-2";
+
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.multiple = true;
+        input.className = "hidden";
+        input.id = `${step.id}_${imgSpec.key}_file`;
+
+        const uploadBtn = document.createElement("label");
+        uploadBtn.className =
+          "cursor-pointer rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700 focus-within:ring-2 focus-within:ring-blue-600";
+        uploadBtn.setAttribute("for", input.id);
+        uploadBtn.textContent = "Upload images";
+
+        const clearBtn = document.createElement("button");
+        clearBtn.className = "rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-100";
+        clearBtn.textContent = "Clear";
+        clearBtn.addEventListener("click", () => {
+          if (!confirm("Remove these images from your saved data?")) return;
+          state.images[imgSpec.key] = [];
+          saveState(true);
+          renderCurrentStep();
+        });
+
+        actions.appendChild(uploadBtn);
+        actions.appendChild(clearBtn);
+
+        top.appendChild(actions);
+        wrap.appendChild(top);
+        wrap.appendChild(input);
+
+        const gallery = document.createElement("div");
+        gallery.className = "mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3";
+
+        const imgs = state.images[imgSpec.key];
+
+        if (imgs.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "col-span-full rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-700";
+          empty.textContent = "No images uploaded yet.";
+          gallery.appendChild(empty);
+        } else {
+          imgs.forEach((img, idx) => {
+            const card = document.createElement("div");
+            card.className = "rounded-lg border border-slate-200 bg-white overflow-hidden";
+
+            card.innerHTML = `
+              <img src="${img.dataUrl}" alt="${escapeHtml(img.name)}" class="h-28 w-full object-cover" />
+              <div class="p-2">
+                <div class="text-xs font-semibold truncate text-slate-900">${escapeHtml(img.name)}</div>
+                <div class="mt-1 text-[11px] text-slate-600">${formatBytes(img.size)}</div>
+                <button class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] font-semibold text-slate-800 hover:bg-slate-100">
+                  Remove
+                </button>
+              </div>
+            `;
+
+            card.querySelector("button").addEventListener("click", () => {
+              state.images[imgSpec.key].splice(idx, 1);
+              saveState(true);
+              renderCurrentStep();
+            });
+
+            gallery.appendChild(card);
+          });
+        }
+
+        wrap.appendChild(gallery);
+
+        input.addEventListener("change", async (e) => {
+          const files = Array.from(e.target.files || []);
+          if (files.length === 0) return;
+
+          for (const f of files) {
+            if (!f.type.startsWith("image/")) continue;
+            if (f.size > 4 * 1024 * 1024) {
+              showToast(`Skipped ${f.name} (too large; keep under ~4MB)`);
+              continue;
+            }
+            const dataUrl = await readFileAsDataURL(f);
+            state.images[imgSpec.key].push({
+              name: f.name,
+              type: f.type,
+              size: f.size,
+              dataUrl,
+              addedAt: new Date().toISOString(),
+            });
+          }
+
+          saveState(true);
+          renderCurrentStep();
+          input.value = "";
+        });
+
+        return wrap;
+      }
+
+      // --------------------
+      // Snapshot + progress
+      // --------------------
+      function renderProgress() {
+        const total = steps.length;
+        const completed = Object.keys(state.ui.completedSteps || {}).length;
+
+        const allFieldKeys = steps.flatMap((s) => (s.fields || []).map((f) => f.key));
+        const filled = allFieldKeys.filter((k) => {
+          const v = state.data[k];
+          return typeof v === "string" && v.trim().length > 0;
+        }).length;
+
+        const fieldRatio = allFieldKeys.length ? filled / allFieldKeys.length : 0;
+        const stepRatio = total ? completed / total : 0;
+        const pct = Math.round((stepRatio * 0.7 + fieldRatio * 0.3) * 100);
+
+        progressBarEl.style.width = `${pct}%`;
+        progressTextEl.textContent = `Progress: ${pct}% • Steps complete: ${completed}/${total}`;
+      }
+
+      function buildSnapshot() {
+        const pick = (k) => (state.data[k] || "").toString().trim();
+
+        const snapshot = {
+          brandName: pick("brandName"),
+          tagline: pick("tagline"),
+          niche: pick("niche"),
+          idealCustomer: pick("customer"),
+          problemOrDesire: pick("problem"),
+          uniqueAngle: pick("usp"),
+          mission: pick("mission"),
+          values: pick("values"),
+          voice: pick("voice"),
+          visuals: { vibe: pick("vibe"), colors: pick("colors"), fonts: pick("fonts") },
+          productStrategy: {
+            model: pick("model"),
+            categories: pick("productCategories"),
+            heroProduct: pick("heroProduct"),
+            priceRange: pick("priceRange"),
+            qualityNotes: pick("qualityNotes"),
+          },
+          storeBlueprint: {
+            platform: pick("storePlatform"),
+            pages: pick("pages"),
+            policies: pick("policies"),
+            trustSignals: pick("trustSignals"),
+          },
+          marketing: {
+            channel: pick("primaryChannel"),
+            pillars: pick("contentPillars"),
+            launchOffer: pick("launchOffer"),
+            weeklyPlan: pick("weeklyPlan"),
+          },
+          ops: {
+            fulfillmentPlan: pick("fulfillmentPlan"),
+            supportPlan: pick("supportPlan"),
+            costs: pick("costs"),
+            profitGoal: pick("profitGoal"),
+          },
+          launch: {
+            launchDate: pick("launchDate"),
+            softLaunchPlan: pick("softLaunchPlan"),
+            first30Days: pick("first30Days"),
+            metrics: pick("metrics"),
+          },
+          completion: { completedSteps: Object.keys(state.ui.completedSteps || {}) },
+        };
+
+        return pruneEmpty(snapshot);
+      }
+
+      function pruneEmpty(obj) {
+        if (obj && typeof obj === "object" && !Array.isArray(obj)) {
+          const out = {};
+          for (const k of Object.keys(obj)) {
+            const v = pruneEmpty(obj[k]);
+            const isEmptyString = typeof v === "string" && v.trim() === "";
+            const isEmptyObj = v && typeof v === "object" && !Array.isArray(v) && Object.keys(v).length === 0;
+            if (!isEmptyString && !isEmptyObj && v !== undefined && v !== null) out[k] = v;
+          }
+          return out;
+        }
+        return obj;
+      }
+
+      function renderSnapshot() {
+        $("brandSnapshot").textContent = JSON.stringify(buildSnapshot(), null, 2);
+      }
+
+      async function copySnapshot() {
+        try {
+          await navigator.clipboard.writeText($("brandSnapshot").textContent || "");
+          showToast("Snapshot copied ✅");
+        } catch {
+          showToast("Copy failed");
+        }
+      }
+
+      // --------------------
+      // Export / Import / Reset
+      // --------------------
+      function exportToJson() {
+        const payload = { ...state, exportedAt: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `brand-builder-export-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(url);
+        showToast("Exported JSON ✅");
+      }
+
+      function importFromJsonFile(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result);
+            if (!parsed || typeof parsed !== "object" || !parsed.data || !parsed.ui) {
+              alert("That file doesn't look like a valid export.");
+              return;
+            }
+            const merged = structuredClone(defaultState);
+            deepMerge(merged, parsed);
+            state = merged;
+
+            saveState(false);
+            renderStepList();
+            renderCurrentStep();
+            renderProgress();
+            renderSnapshot();
+            showToast("Imported ✅");
+          } catch {
+            alert("Invalid JSON file.");
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = "";
+      }
+
+      function resetAll() {
+        if (!confirm("Delete ALL saved data for this tutorial in this browser?")) return;
+        localStorage.removeItem(STORAGE_KEY);
+        state = structuredClone(defaultState);
+        saveState(false);
+        renderStepList();
+        renderCurrentStep();
+        renderProgress();
+        renderSnapshot();
+        showToast("Reset complete");
+      }
+
+      // --------------------
+      // Toast + utils + debounced save
+      // --------------------
+      function showToast(message) {
+        const toast = $("toast");
+        $("toastText").textContent = message;
+        toast.classList.remove("opacity-0");
+        toast.classList.add("opacity-100");
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => {
+          toast.classList.add("opacity-0");
+          toast.classList.remove("opacity-100");
+        }, 1600);
+      }
+
+      function escapeHtml(str) {
+        return (str ?? "").toString().replace(/[&<>"']/g, (m) => {
+          const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
+          return map[m] || m;
+        });
+      }
+
+      function formatBytes(bytes) {
+        if (bytes === 0) return "0 B";
+        const k = 1024;
+        const sizes = ["B", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+      }
+
+      function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      let saveTimer = null;
+      function saveDebounced() {
+        saveStatusEl.textContent = "Saving…";
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+          saveState(true);
+          renderStepList();
+        }, 350);
+      }
+    </script>
+  </body>
+</html>
